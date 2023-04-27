@@ -1,4 +1,4 @@
-package com.krasnov.brutus.kafka;
+package com.krasnov.brutus.k8s;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,7 +47,6 @@ public class KubernetesConfiguration {
         this.configurationManager = configurationManager;
     }
 
-    @Bean
     public void initK8sClient() {
         ExecutorService executorService = Executors.newFixedThreadPool(5, Thread::new);
         executorService.execute(() -> {
@@ -63,7 +62,6 @@ public class KubernetesConfiguration {
     }
 
 
-    @Bean
     public void initConfigFromConfigMap() throws Exception {
         V1ConfigMap configMap = api.readNamespacedConfigMap(configMapName, DEFAULT_NAMESPACE, "");
         Map<String, String> data = configMap.getData();
