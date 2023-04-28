@@ -6,6 +6,7 @@ import com.google.common.io.ByteStreams;
 import com.krasnov.brutus.api.ConfigurationManager;
 import io.kubernetes.client.PodLogs;
 import io.kubernetes.client.openapi.ApiClient;
+import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
 import io.kubernetes.client.openapi.models.V1Pod;
@@ -27,8 +28,8 @@ import java.util.concurrent.Executors;
 public class KubernetesConfiguration {
 
     private final ConfigurationManager configurationManager;
-    private final ApiClient client;
-    private final CoreV1Api api;
+    private ApiClient client;
+    private CoreV1Api api;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -42,9 +43,13 @@ public class KubernetesConfiguration {
     private final String DEFAULT_NAMESPACE = "default";
 
     public KubernetesConfiguration(ConfigurationManager configurationManager) throws IOException {
-        client = Config.defaultClient();
-        api = new CoreV1Api(client);
         this.configurationManager = configurationManager;
+        try {
+            client = Config.defaultClient();
+            api = new CoreV1Api(client);
+        } catch (IOException e) {
+            log.error("Impossible to connect to k8s, please check k8s config file {}", e.getMessage());
+        }
     }
 
     public void initK8sClient() {
@@ -62,15 +67,22 @@ public class KubernetesConfiguration {
     }
 
 
+    @Bean
     public void initConfigFromConfigMap() throws Exception {
-        V1ConfigMap configMap = api.readNamespacedConfigMap(configMapName, DEFAULT_NAMESPACE, "");
-        Map<String, String> data = configMap.getData();
+        try {
+            V1ConfigMap configMap = api.readNamespacedConfigMap(configMapName, DEFAULT_NAMESPACE, "");
+            Map<String, String> data = configMap.getData();
 
-        if (data != null) {
-            String jsonUnmarshalled = data.get("brutus-config");
-            List<ConfigurationManager.LoggerEntity> entityList = OBJECT_MAPPER.readValue(jsonUnmarshalled, new TypeReference<>() {});
-            log.debug("Configmap brutus-config read");
-            configurationManager.overwriteConfig(entityList);
+            if (data != null) {
+                String jsonUnmarshalled = data.get("brutus-config");
+                log.debug(jsonUnmarshalled);
+                List<ConfigurationManager.LoggerEntity> entityList = OBJECT_MAPPER.readValue(jsonUnmarshalled, new TypeReference<>() {
+                });
+                log.debug("Configmap brutus-config read");
+                configurationManager.overwriteConfig(entityList);
+            }
+        } catch (ApiException apiException) {
+            log.error("Some kind of error appears while trying to access to k8s api {}", apiException.getMessage());
         }
     }
 }
