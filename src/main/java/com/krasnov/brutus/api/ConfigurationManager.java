@@ -1,41 +1,39 @@
 package com.krasnov.brutus.api;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @Component
 public class ConfigurationManager {
 
-    private List<LoggerEntity> config;
+    private Set<LoggerEntity> config;
 
     public ConfigurationManager() {
-        this(new ArrayList<>());
+        this(new LinkedHashSet<>());
     }
 
-    public ConfigurationManager(List<LoggerEntity> config) {
+    public ConfigurationManager(Set<LoggerEntity> config) {
         this.config = config;
     }
 
     @Data
     public static class LoggerEntity {
-        private List<String> pods;
+        private Set<String> pods;
         private String namespace;
     }
 
-    public void overwriteConfig(List<LoggerEntity> newConfig) {
+    public void overwriteConfig(Set<LoggerEntity> newConfig) {
         this.config = newConfig;
     }
 
-    public List<LoggerEntity> getRepresentation() {
+    public Set<LoggerEntity> getRepresentation() {
         return config;
     }
 }

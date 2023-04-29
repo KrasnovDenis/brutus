@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -42,7 +43,7 @@ public class KubernetesConfiguration {
      */
     private final String DEFAULT_NAMESPACE = "default";
 
-    public KubernetesConfiguration(ConfigurationManager configurationManager) throws IOException {
+    public KubernetesConfiguration(ConfigurationManager configurationManager) {
         this.configurationManager = configurationManager;
         try {
             client = Config.defaultClient();
@@ -76,7 +77,7 @@ public class KubernetesConfiguration {
             if (data != null) {
                 String jsonUnmarshalled = data.get("brutus-config");
                 log.debug(jsonUnmarshalled);
-                List<ConfigurationManager.LoggerEntity> entityList = OBJECT_MAPPER.readValue(jsonUnmarshalled, new TypeReference<>() {
+                Set<ConfigurationManager.LoggerEntity> entityList = OBJECT_MAPPER.readValue(jsonUnmarshalled, new TypeReference<>() {
                 });
                 log.debug("Configmap brutus-config read");
                 configurationManager.overwriteConfig(entityList);

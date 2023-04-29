@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 public class ConfigurationController {
@@ -25,7 +26,7 @@ public class ConfigurationController {
     }
 
     @PostMapping(CONFIGURATION_ENDPOINT)
-    public ResponseEntity<?> recreateConfig(@RequestBody List<ConfigurationManager.LoggerEntity> newConfig) {
+    public ResponseEntity<?> recreateConfig(@RequestBody Set<ConfigurationManager.LoggerEntity> newConfig) {
         configuration.overwriteConfig(newConfig);
         return ResponseEntity.ok("Successfully updated!");
     }
