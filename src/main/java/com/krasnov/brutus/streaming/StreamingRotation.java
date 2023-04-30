@@ -1,4 +1,4 @@
-package com.krasnov.brutus.streaming;
+    package com.krasnov.brutus.streaming;
 
 import com.google.common.io.ByteStreams;
 import com.krasnov.brutus.adapters.Adapter;
@@ -12,30 +12,23 @@ import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class StreamingRotation {
+/**
+ * адаптер, который будет пересылать стрим из указанной поды, 
+ * на указанный вывод (вывод должен настраиваться конфигом)
+ * 
+ **/
 
     private final Adapter adapter;
     private final ConfigurationManager configuration;
-    ExecutorService executorService = Executors.newFixedThreadPool(5, Thread::new);
+
     private void startStreaming () {
-
-        configuration.getRepresentation().stream(item -> {
-            adapter.startNewThreadStreaming(item, );
-
-            executorService.execute(() -> {
-                try {
-                    V1Pod pod = api.readNamespacedPod("counter-1-55c8d66bcd-gm8rk", DEFAULT_NAMESPACE, "");
-                    PodLogs podLogs = new PodLogs(client);
-                    InputStream is = podLogs.streamNamespacedPodLog(pod);
-                    ByteStreams.copy(is, System.out);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        configuration.getRepresentation().forEach(namespace -> {
+            log.debug("Started new thread stream for {}", namespace.getNamespace());
+            adapter.startNewThreadStreaming(namespace.getPods());
         })
-
     }
-
 }
