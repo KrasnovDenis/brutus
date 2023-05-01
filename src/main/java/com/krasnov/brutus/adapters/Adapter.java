@@ -1,5 +1,7 @@
 package com.krasnov.brutus.adapters;
 
+import com.krasnov.brutus.api.ConfigurationManager;
+
 public interface Adapter {
-    void startNewThreadStreaming(Set<String> pod);
+    void startNewThreadStreaming(ConfigurationManager.LoggerEntity loggerSettings);
 }

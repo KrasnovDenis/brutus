@@ -1,4 +1,5 @@
 package com.krasnov.brutus.adapters.elastic;
+
 //
 //import org.elasticsearch.client.RestHighLevelClient;
 //import org.springframework.context.annotation.Bean;

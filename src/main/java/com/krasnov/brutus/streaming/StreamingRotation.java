@@ -1,34 +1,31 @@
-    package com.krasnov.brutus.streaming;
+package com.krasnov.brutus.streaming;
 
-import com.google.common.io.ByteStreams;
 import com.krasnov.brutus.adapters.Adapter;
 import com.krasnov.brutus.api.ConfigurationManager;
-import io.kubernetes.client.PodLogs;
-import io.kubernetes.client.openapi.models.V1Pod;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.io.InputStream;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Slf4j
-@Service
-@AllArgsConstructor
+@Component
 public class StreamingRotation {
-/**
- * адаптер, который будет пересылать стрим из указанной поды, 
- * на указанный вывод (вывод должен настраиваться конфигом)
- * 
- **/
+    /**
+     * адаптер, который будет пересылать стрим из указанной поды,
+     * на указанный вывод (вывод должен настраиваться конфигом)
+     * <p>
+     **/
 
     private final Adapter adapter;
     private final ConfigurationManager configuration;
 
-    private void startStreaming () {
-        configuration.getRepresentation().forEach(namespace -> {
+    public StreamingRotation(Adapter adapter, ConfigurationManager configuration) {
+        this.adapter = adapter;
+        this.configuration = configuration;
+    }
+
+    public void restartStreaming() {
+        configuration.getConfig().forEach(namespace -> {
             log.debug("Started new thread stream for {}", namespace.getNamespace());
-            adapter.startNewThreadStreaming(namespace.getPods());
-        })
+            adapter.startNewThreadStreaming(namespace);
+        });
     }
 }
