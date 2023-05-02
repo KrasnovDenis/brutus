@@ -42,7 +42,6 @@ public class ElasticAdapter implements Adapter {
         CoreV1Api api = k8sService.getApi();
         for (String podName : loggerSettings.getPods()) {
             log.info("NEW THREAD STARTED FOR POD : {}", podName);
-
             Runnable startNewStream = () -> {
                 try {
                     V1Pod pod = api.readNamespacedPod(podName, loggerSettings.getNamespace(), "");
