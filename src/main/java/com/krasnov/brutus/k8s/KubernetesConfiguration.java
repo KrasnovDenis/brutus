@@ -38,6 +38,7 @@ public class KubernetesConfiguration {
      * For development convenient it hardcoded as default
      */
     private final String DEFAULT_NAMESPACE = "default";
+    private final String BRUTUS_CONFIG = "brutus-config";
 
     public KubernetesConfiguration() {
         try {
@@ -48,6 +49,11 @@ public class KubernetesConfiguration {
         }
     }
 
+
+    /**
+     * Search for config map in json format by name "brutus-config"
+     * @return Bean with this configmap if present, null otherwise
+     */
     @Bean
     public ConfigurationManager initConfigFromConfigMap() throws Exception {
         try {
@@ -55,7 +61,7 @@ public class KubernetesConfiguration {
             Map<String, String> data = configMap.getData();
 
             if (data != null) {
-                String jsonUnmarshalled = data.get("brutus-config");
+                String jsonUnmarshalled = data.get(BRUTUS_CONFIG);
                 log.debug(jsonUnmarshalled);
                 Set<ConfigurationManager.LoggerEntity> entityList = OBJECT_MAPPER.readValue(jsonUnmarshalled, new TypeReference<>() {
                 });
