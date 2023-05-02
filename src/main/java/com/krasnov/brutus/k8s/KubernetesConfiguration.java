@@ -36,8 +36,14 @@ public class KubernetesConfiguration {
     /**
      * Brutus should be deployed on special namespace per cluster.
      * For development convenient it hardcoded as default
+
+     * Todo: refactor it
      */
     private final String DEFAULT_NAMESPACE = "default";
+
+    /**
+     * label name in config-map set in field configMapName
+     */
     private final String BRUTUS_CONFIG = "brutus-config";
 
     public KubernetesConfiguration() {
