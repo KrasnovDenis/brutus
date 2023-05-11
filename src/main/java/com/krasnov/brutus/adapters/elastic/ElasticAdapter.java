@@ -55,7 +55,7 @@ public class ElasticAdapter implements Adapter {
                     V1Pod pod = api.readNamespacedPod(podName, loggerSettings.getNamespace(), "");
                     PodLogs podLogs = new PodLogs(client);
                     InputStream stream = podLogs.streamNamespacedPodLog(pod);
-                    sendToElastic(stream, podName, loggerSettings.getNamespace());
+                    processStream(stream, podName, loggerSettings.getNamespace());
                 } catch (Exception e) {
                     log.error("Streaming from k8s pod {} failed", podName);
                 }
@@ -69,7 +69,7 @@ public class ElasticAdapter implements Adapter {
         streamingQueue.clear();
     }
 
-    private void processStream(InputStream stream, ExecutorService executor, String podName, String namespace) throws IOException {
+    private void processStream(InputStream stream, String podName, String namespace) throws IOException {
         while (true) {
             List<Character> payload = new LinkedList<>();
             char symbol = (char) stream.read();
@@ -82,27 +82,19 @@ public class ElasticAdapter implements Adapter {
                 symbol = (char) stream.read();
                 payload.add(symbol);
             }
-
-            Runnable r = () -> {
-                try {
-                    String logMessage = Joiner.on("").join(payload);
-                    LoggerRecord loggerRecord = new LoggerRecord(logMessage, podName, namespace);
-                    elasticsearchClient.index(i -> i.index(elasticStreamName)
-                            .id("[RequestId=" + UUID.randomUUID() + "]")
-                            .document(loggerRecord));
-                } catch (IOException e) {
-                    log.error("Can't send logs into outer elastic instance");
-                }
-            };
-            executor.execute(r);
+            String logMessage = Joiner.on("").join(payload);
+            LoggerRecord record = new LoggerRecord(logMessage, podName, namespace);
+            sendToElastic(record);
         }
     }
 
-    private void sendToElastic(InputStream stream, String podName, String namespace) {
+    private void sendToElastic(LoggerRecord record) {
         try {
-            processStream(stream, Executors.newSingleThreadExecutor(Thread::new), podName, namespace);
+            elasticsearchClient.index(i -> i.index(elasticStreamName)
+                    .id("[RequestId=" + UUID.randomUUID() + "]")
+                    .document(record));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("Can't send logs into outer elastic instance");
         }
     }
 }
