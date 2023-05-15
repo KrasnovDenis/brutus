@@ -9,4 +9,6 @@ public class LoggerRecord {
     private String log;
     private String podName;
     private String namespace;
+    private String requestId;
+    private String timestamp;
 }

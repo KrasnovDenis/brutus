@@ -1,86 +1,86 @@
 {
-	"info": {
-		"_postman_id": "f1e155c1-6dd7-4c00-abe0-464e50bc3c8e",
-		"name": "Brutus API",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "9504789"
-	},
-	"item": [
-		{
-			"name": "Configuration of Brutus",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{brutus_instance}}/api/v1/brutus/config",
-					"host": [
-						"{{brutus_instance}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"brutus",
-						"config"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "New Request",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "[{\r\n    \"namespace\": \"default\",\r\n    \"pods\": [\r\n        \"POD-NAME\"\r\n    ]\r\n}]",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{brutus_instance}}/api/v1/brutus/config",
-					"host": [
-						"{{brutus_instance}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"brutus",
-						"config"
-					]
-				}
-			},
-			"response": []
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "brutus_instance",
-			"value": "http://localhost:8082",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "f1e155c1-6dd7-4c00-abe0-464e50bc3c8e",
+    "name": "Brutus API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "9504789"
+  },
+  "item": [
+    {
+      "name": "Configuration of Brutus",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{brutus_instance}}/api/v1/brutus/config",
+          "host": [
+            "{{brutus_instance}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "brutus",
+            "config"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "New Request",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"input\": [\r\n        {\r\n            \"namespace\": \"default\",\r\n            \"pods\": [\r\n                \"counter-54cffb4d56-z9frf\"\r\n            ]\r\n        }\r\n    ],\r\n    \"filter\": {\r\n        \"pod\": \"counter\",\r\n        \"namespace\": \"default\",\r\n        \"log\": \"n**ger\"\r\n    }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{brutus_instance}}/api/v1/brutus/config",
+          "host": [
+            "{{brutus_instance}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "brutus",
+            "config"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "brutus_instance",
+      "value": "http://localhost:8082",
+      "type": "string"
+    }
+  ]
 }

@@ -2,23 +2,22 @@ package com.krasnov.brutus.api;
 
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class ConfigurationManager {
 
-    private Set<LoggerEntity> config;
-
-    public ConfigurationManager(Set<LoggerEntity> config) {
-        this.config = new LinkedHashSet<>(config);
-    }
+    private Set<InputSetting> input;
+    private Map<String, String> filter;
 
     @Data
-    public static class LoggerEntity {
+    public static class InputSetting {
         private Set<String> pods;
         private String namespace;
     }

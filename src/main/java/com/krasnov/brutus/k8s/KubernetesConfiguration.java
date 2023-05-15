@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 
 @Slf4j
 @Configuration
@@ -36,7 +35,7 @@ public class KubernetesConfiguration {
     /**
      * Brutus should be deployed on special namespace per cluster.
      * For development convenient it hardcoded as default
-
+     * <p>
      * Todo: refactor it
      */
     private final String DEFAULT_NAMESPACE = "default";
@@ -58,6 +57,7 @@ public class KubernetesConfiguration {
 
     /**
      * Search for config map in json format by name "brutus-config"
+     *
      * @return Bean with this configmap if present, null otherwise
      */
     @Bean
@@ -69,10 +69,10 @@ public class KubernetesConfiguration {
             if (data != null) {
                 String jsonUnmarshalled = data.get(BRUTUS_CONFIG);
                 log.debug(jsonUnmarshalled);
-                Set<ConfigurationManager.LoggerEntity> entityList = OBJECT_MAPPER.readValue(jsonUnmarshalled, new TypeReference<>() {
+                ConfigurationManager entityList = OBJECT_MAPPER.readValue(jsonUnmarshalled, new TypeReference<>() {
                 });
                 log.debug("Configmap brutus-config initialized");
-                return new ConfigurationManager(entityList);
+                return entityList;
             }
         } catch (ApiException apiException) {
             log.error("Some kind of error appears while trying to access to k8s api {}", apiException.getMessage());

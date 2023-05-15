@@ -17,11 +17,11 @@ public class ConfigurationStreamManager {
     public ConfigurationStreamManager(StreamingRotation streamingRotation, ConfigurationManager configurationManager) {
         this.streamingRotation = streamingRotation;
         this.configurationManager = configurationManager;
-        this.overwriteConfig(configurationManager.getConfig());
+        this.overwriteConfig(configurationManager.getInput());
     }
 
-    public void overwriteConfig(Set<ConfigurationManager.LoggerEntity> newConfig) {
-        configurationManager.setConfig(newConfig);
+    public void overwriteConfig(Set<ConfigurationManager.InputSetting> newConfig) {
+        configurationManager.setInput(newConfig);
         streamingRotation.restartStreaming();
     }
 }
