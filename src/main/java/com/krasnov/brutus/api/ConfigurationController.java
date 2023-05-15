@@ -20,11 +20,11 @@ public class ConfigurationController {
 
     @GetMapping(CONFIGURATION_ENDPOINT)
     public ResponseEntity<?> getConfiguration() {
-        return ResponseEntity.ok(configuration.getConfigurationManager().getConfig());
+        return ResponseEntity.ok(configuration.getConfigurationManager().getInput());
     }
 
     @PostMapping(CONFIGURATION_ENDPOINT)
-    public ResponseEntity<?> recreateConfig(@RequestBody Set<ConfigurationManager.LoggerEntity> newConfig) {
+    public ResponseEntity<?> recreateConfig(@RequestBody Set<ConfigurationManager.InputSetting> newConfig) {
         configuration.overwriteConfig(newConfig);
         return ResponseEntity.ok("Successfully updated!");
     }

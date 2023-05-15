@@ -23,7 +23,7 @@ public class StreamingRotation {
     }
 
     public void restartStreaming() {
-        configuration.getConfig().forEach(namespace -> {
+        configuration.getInput().forEach(namespace -> {
             log.debug("Started new thread stream for {}", namespace.getNamespace());
             adapter.startNewThreadStreaming(namespace);
         });

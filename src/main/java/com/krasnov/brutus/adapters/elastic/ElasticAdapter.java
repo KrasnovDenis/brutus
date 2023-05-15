@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.google.common.base.Joiner;
 import com.krasnov.brutus.adapters.Adapter;
 import com.krasnov.brutus.api.ConfigurationManager;
+import com.krasnov.brutus.api.filter.Filter;
 import com.krasnov.brutus.api.pojo.LoggerRecord;
 import com.krasnov.brutus.k8s.KubernetesConfiguration;
 import io.kubernetes.client.PodLogs;
@@ -31,21 +32,22 @@ import static com.krasnov.brutus.api.misc.Constants.THREAD_POOL_SIZE;
 @Slf4j
 public class ElasticAdapter implements Adapter {
     private KubernetesConfiguration k8sService;
-
     private ElasticsearchClient elasticsearchClient;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE, Thread::new);
+    private Filter filter;
 
+    private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE, Thread::new);
     private final List<Future<?>> streamingQueue = new LinkedList<>();
     private final String elasticStreamName = "brutus-topic";
 
     @Autowired
-    public ElasticAdapter(KubernetesConfiguration k8sService, ElasticsearchClient elasticsearchClient) {
+    public ElasticAdapter(KubernetesConfiguration k8sService, ElasticsearchClient elasticsearchClient, Filter filter) {
         this.k8sService = k8sService;
         this.elasticsearchClient = elasticsearchClient;
+        this.filter = filter;
     }
 
     @Override
-    public void startNewThreadStreaming(ConfigurationManager.LoggerEntity loggerSettings) {
+    public void startNewThreadStreaming(ConfigurationManager.InputSetting loggerSettings) {
         completeOldThreads();
         ApiClient client = k8sService.getClient();
         CoreV1Api api = k8sService.getApi();
@@ -83,16 +85,21 @@ public class ElasticAdapter implements Adapter {
                 payload.add(symbol);
             }
             String logMessage = Joiner.on("").join(payload);
-            LoggerRecord record = new LoggerRecord(logMessage, podName, namespace);
+            LoggerRecord record = new LoggerRecord(logMessage, podName, namespace, null, null);
             sendToElastic(record);
         }
     }
 
-    private void sendToElastic(LoggerRecord record) {
+    private void sendToElastic(LoggerRecord row) {
         try {
-            elasticsearchClient.index(i -> i.index(elasticStreamName)
-                    .id("[RequestId=" + UUID.randomUUID() + "]")
-                    .document(record));
+            LoggerRecord record = filter.apply(row);
+            if (record != null) {
+                elasticsearchClient.index(i -> i.index(elasticStreamName)
+                        .id("[RequestId=" + UUID.randomUUID() + "]")
+                        .document(record));
+            } else {
+                log.trace("Log row rejected by filter");
+            }
         } catch (IOException e) {
             log.error("Can't send logs into outer elastic instance");
         }
