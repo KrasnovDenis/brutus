@@ -7,6 +7,7 @@ import com.krasnov.brutus.api.ConfigurationManager;
 import com.krasnov.brutus.api.filter.Filter;
 import com.krasnov.brutus.api.pojo.LoggerRecord;
 import com.krasnov.brutus.k8s.KubernetesConfiguration;
+import com.krasnov.brutus.metrics.MetricsResponse;
 import io.kubernetes.client.PodLogs;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
@@ -14,6 +15,7 @@ import io.kubernetes.client.openapi.models.V1Pod;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -37,7 +39,11 @@ public class ElasticAdapter implements Adapter {
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE, Thread::new);
     private final List<Future<?>> streamingQueue = new LinkedList<>();
-    private final String elasticStreamName = "brutus-topic";
+
+    @Value("${brutus.logs.stream.name}")
+    private String LOGS_STREAM;
+    @Value("${brutus.metrics.stream.name}")
+    private String METRICS_STREAM;
 
     @Autowired
     public ElasticAdapter(KubernetesConfiguration k8sService, ElasticsearchClient elasticsearchClient, Filter filter) {
@@ -71,6 +77,15 @@ public class ElasticAdapter implements Adapter {
         streamingQueue.clear();
     }
 
+
+    /**
+     * todo: fix a bug with start streaming from N pos.
+     *
+     * @param stream
+     * @param podName
+     * @param namespace
+     * @throws IOException
+     */
     private void processStream(InputStream stream, String podName, String namespace) throws IOException {
         while (true) {
             List<Character> payload = new LinkedList<>();
@@ -94,14 +109,28 @@ public class ElasticAdapter implements Adapter {
         try {
             LoggerRecord record = filter.apply(row);
             if (record != null) {
-                elasticsearchClient.index(i -> i.index(elasticStreamName)
-                        .id("[RequestId=" + UUID.randomUUID() + "]")
-                        .document(record));
+                sendAsMessage(row);
             } else {
                 log.trace("Log row rejected by filter");
             }
         } catch (IOException e) {
             log.error("Can't send logs into outer elastic instance");
+        }
+    }
+
+    @Override
+    public void sendAsMessage(LoggerRecord record) throws IOException {
+        elasticsearchClient.index(i -> i.index(LOGS_STREAM)
+                .id("[RequestId=" + UUID.randomUUID() + "]")
+                .document(record));
+    }
+
+    @Override
+    public void sendAsMessage(List<MetricsResponse> responseList) throws IOException {
+        for (MetricsResponse metric : responseList) {
+            elasticsearchClient.index(i -> i.index(METRICS_STREAM)
+                    .id("[RequestId=" + UUID.randomUUID() + "]")
+                    .document(metric));
         }
     }
 }

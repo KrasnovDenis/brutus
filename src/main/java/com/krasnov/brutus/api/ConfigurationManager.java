@@ -13,6 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class ConfigurationManager {
 
+    private Set<String> metric;
     private Set<InputSetting> input;
     private Map<String, String> filter;
 

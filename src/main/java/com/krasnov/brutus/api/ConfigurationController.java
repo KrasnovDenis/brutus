@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
-
 import static com.krasnov.brutus.api.misc.Constants.CONFIGURATION_ENDPOINT;
 
 @RestController
@@ -24,7 +22,7 @@ public class ConfigurationController {
     }
 
     @PostMapping(CONFIGURATION_ENDPOINT)
-    public ResponseEntity<?> recreateConfig(@RequestBody Set<ConfigurationManager.InputSetting> newConfig) {
+    public ResponseEntity<?> recreateConfig(@RequestBody ConfigurationManager newConfig) {
         configuration.overwriteConfig(newConfig);
         return ResponseEntity.ok("Successfully updated!");
     }

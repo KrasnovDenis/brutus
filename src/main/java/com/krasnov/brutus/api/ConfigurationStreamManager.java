@@ -4,24 +4,22 @@ import com.krasnov.brutus.streaming.StreamingRotation;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
-
 @Service
 @Getter
 public class ConfigurationStreamManager {
 
     private final StreamingRotation streamingRotation;
 
-    private final ConfigurationManager configurationManager;
+    private ConfigurationManager configurationManager;
 
     public ConfigurationStreamManager(StreamingRotation streamingRotation, ConfigurationManager configurationManager) {
         this.streamingRotation = streamingRotation;
         this.configurationManager = configurationManager;
-        this.overwriteConfig(configurationManager.getInput());
+        this.overwriteConfig(configurationManager);
     }
 
-    public void overwriteConfig(Set<ConfigurationManager.InputSetting> newConfig) {
-        configurationManager.setInput(newConfig);
+    public void overwriteConfig(ConfigurationManager newConfig) {
+        configurationManager = newConfig;
         streamingRotation.restartStreaming();
     }
 }
