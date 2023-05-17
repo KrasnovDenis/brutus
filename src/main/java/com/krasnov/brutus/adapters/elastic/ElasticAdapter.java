@@ -20,8 +20,12 @@ import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,7 +40,7 @@ public class ElasticAdapter implements Adapter {
     private KubernetesConfiguration k8sService;
     private ElasticsearchClient elasticsearchClient;
     private Filter filter;
-
+   private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE, Thread::new);
     private final List<Future<?>> streamingQueue = new LinkedList<>();
 
@@ -100,7 +104,13 @@ public class ElasticAdapter implements Adapter {
                 payload.add(symbol);
             }
             String logMessage = Joiner.on("").join(payload);
-            LoggerRecord record = new LoggerRecord(logMessage, podName, namespace, null, null);
+
+
+            String date = df.format(new Date(System.currentTimeMillis()));
+            Map<String, String> timestamp = new HashMap<>() {{
+                put("@timestamp", date);
+            }};
+            LoggerRecord record = new LoggerRecord(logMessage, podName, namespace, UUID.randomUUID().toString(), timestamp);
             sendToElastic(record);
         }
     }
@@ -120,6 +130,7 @@ public class ElasticAdapter implements Adapter {
 
     @Override
     public void sendAsMessage(LoggerRecord record) throws IOException {
+
         elasticsearchClient.index(i -> i.index(LOGS_STREAM)
                 .id("[RequestId=" + UUID.randomUUID() + "]")
                 .document(record));
@@ -128,6 +139,9 @@ public class ElasticAdapter implements Adapter {
     @Override
     public void sendAsMessage(List<MetricsResponse> responseList) throws IOException {
         for (MetricsResponse metric : responseList) {
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+            String date = df.format(new Date(System.currentTimeMillis()));
+            metric.getMetrics().put("@timestamp", date);
             elasticsearchClient.index(i -> i.index(METRICS_STREAM)
                     .id("[RequestId=" + UUID.randomUUID() + "]")
                     .document(metric));
