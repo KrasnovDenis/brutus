@@ -2,6 +2,8 @@ package com.krasnov.brutus.api.filter;
 
 import com.krasnov.brutus.api.ConfigurationManager;
 import com.krasnov.brutus.api.pojo.LoggerRecord;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -18,15 +20,16 @@ import java.util.Map;
 @Slf4j
 public class SimpleLogFilter implements Filter {
 
-    private final ConfigurationManager configurationManager;
+    @Setter
+    @Getter
+    private Map<String, String> filterConfig;
 
     public SimpleLogFilter(ConfigurationManager configurationManager) {
-        this.configurationManager = configurationManager;
+        this.filterConfig = configurationManager.getFilter();
     }
 
     @Override
     public LoggerRecord apply(LoggerRecord loggerRecord) {
-        Map<String, String> filterConfig = configurationManager.getFilter();
         boolean passed = false;
         for (String type : filterConfig.keySet()) {
             //if already passed by another key

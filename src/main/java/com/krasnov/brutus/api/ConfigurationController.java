@@ -18,7 +18,7 @@ public class ConfigurationController {
 
     @GetMapping(CONFIGURATION_ENDPOINT)
     public ResponseEntity<?> getConfiguration() {
-        return ResponseEntity.ok(configuration.getConfigurationManager().getInput());
+        return ResponseEntity.ok(configuration.getConfigurationManager());
     }
 
     @PostMapping(CONFIGURATION_ENDPOINT)
