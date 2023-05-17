@@ -22,7 +22,7 @@ import java.util.Set;
 @EnableScheduling
 @Component
 public class MetricsManager {
-    private final Set<String> endpointList;
+    private Set<String> endpointList;
 
     private final Adapter adapter;
 
@@ -47,7 +47,8 @@ public class MetricsManager {
                     .retrieve();
 
             String jsonResponse = responseSpec.bodyToMono(String.class).block(Duration.ofSeconds(RESPONSE_TIMEOUT));
-            metrics.add(OBJECT_MAPPER.readValue(jsonResponse, new TypeReference<>() {}));
+            metrics.add(OBJECT_MAPPER.readValue(jsonResponse, new TypeReference<>() {
+            }));
         }
 
         adapter.sendAsMessage(metrics);
@@ -60,5 +61,9 @@ public class MetricsManager {
         }
 
         return clientSet;
+    }
+
+    public void updateConfig(ConfigurationManager configurationManager) {
+        this.endpointList = configurationManager.getMetric();
     }
 }

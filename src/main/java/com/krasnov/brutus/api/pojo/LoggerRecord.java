@@ -3,6 +3,8 @@ package com.krasnov.brutus.api.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 @AllArgsConstructor
 public class LoggerRecord {
@@ -10,5 +12,5 @@ public class LoggerRecord {
     private String podName;
     private String namespace;
     private String requestId;
-    private String timestamp;
+    private Map<String, String> timestamp;
 }
