@@ -75,7 +75,7 @@ public class KubernetesConfiguration {
                 return entityList;
             }
         } catch (ApiException apiException) {
-            log.error("Some kind of error appears while trying to access to k8s api {}", apiException.getMessage());
+            log.error("Some kind of error appears while trying to access to k8s api", apiException);
         }
 
         return null;
